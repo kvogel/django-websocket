@@ -1,3 +1,4 @@
+
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils.decorators import decorator_from_middleware
@@ -11,6 +12,7 @@ WEBSOCKET_MIDDLEWARE_INSTALLED = 'django_websocket.middleware.WebSocketMiddlewar
 
 def _setup_websocket(func):
     from functools import wraps
+
     @wraps(func)
     def new_func(request, *args, **kwargs):
         response = func(request, *args, **kwargs)

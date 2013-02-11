@@ -1,10 +1,11 @@
+
 import collections
 import select
 import string
 import struct
 try:
     from hashlib import md5
-except ImportError: #pragma NO COVER
+except ImportError:  # pragma NO COVER
     from md5 import md5
 from errno import EINTR
 from socket import error as SocketError
@@ -104,7 +105,6 @@ class WebSocket(object):
     """
     _socket_recv_bytes = 4096
 
-
     def __init__(self, socket, protocol, version=76,
         handshake_reply=None, handshake_sent=None):
         '''
@@ -163,10 +163,10 @@ class WebSocket(object):
             if frame_type == 0:
                 # Normal message.
                 end_idx = buf.find("\xFF")
-                if end_idx == -1: #pragma NO COVER
+                if end_idx == -1:  # pragma NO COVER
                     break
                 msgs.append(buf[1:end_idx].decode('utf-8', 'replace'))
-                buf = buf[end_idx+1:]
+                buf = buf[end_idx + 1:]
             elif frame_type == 255:
                 # Closing handshake.
                 assert ord(buf[1]) == 0, "Unexpected closing handshake: %r" % buf
@@ -289,3 +289,4 @@ class WebSocket(object):
         Forcibly close the websocket.
         '''
         self._send_closing_frame()
+

@@ -10,7 +10,7 @@ class WebSocketMiddleware(object):
     def process_request(self, request):
         try:
             request.websocket = setup_websocket(request)
-        except MalformedWebSocket, e:
+        except MalformedWebSocket:
             request.websocket = None
             request.is_websocket = lambda: False
             return HttpResponseBadRequest()

@@ -1,4 +1,5 @@
-from django.conf.urls.defaults import *
+
+from django.conf.urls.defaults import patterns, url
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django_websocket import require_websocket
@@ -7,10 +8,9 @@ from django_websocket import require_websocket
 # from django.contrib import admin
 # admin.autodiscover()
 
-def base_view(request):
-    return render_to_response('index.html', {
 
-    }, context_instance=RequestContext(request))
+def base_view(request):
+    return render_to_response('index.html', context_instance=RequestContext(request))
 
 
 @require_websocket
