@@ -185,7 +185,8 @@ class WebSocket(object):
                 self.closed = True
                 break
             else:
-                raise ValueError("Don't understand how to parse this type of message: %r" % buf)
+                return None
+                #raise ValueError("Don't understand how to parse this type of message: %r" % buf)
         self._buffer = buf
         return msgs
 
@@ -201,13 +202,15 @@ class WebSocket(object):
         '''
         Gets new data from the socket and try to parse new messages.
         '''
+        rc = False
         delta = self.socket.recv(self._socket_recv_bytes)
-        if delta == '':
-            return False
-        self._buffer += delta
-        msgs = self._parse_message_queue()
-        self._message_queue.extend(msgs)
-        return True
+        if delta != '':
+            self._buffer += delta
+            msgs = self._parse_message_queue()
+            if msgs != None:
+                self._message_queue.extend(msgs)
+                rc = True
+        return rc
 
     def _socket_can_recv(self, timeout=0.0):
         '''
