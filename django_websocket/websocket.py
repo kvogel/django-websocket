@@ -3,6 +3,10 @@ import collections
 import select
 import string
 import struct
+
+from base64 import b64encode
+from hashlib import sha1
+
 try:
     from hashlib import md5
 except ImportError:  # pragma NO COVER
@@ -34,15 +38,22 @@ def _extract_number(value):
 
 
 def setup_websocket(request):
-    if request.META.get('HTTP_CONNECTION', None) == 'Upgrade' and \
-        request.META.get('HTTP_UPGRADE', None) == 'WebSocket':
+    if request.META.get('HTTP_CONNECTION', '').lower() == 'upgrade' and \
+        request.META.get('HTTP_UPGRADE', '').lower() == 'websocket':
 
+        webkey = ''
         # See if they sent the new-format headers
         if 'HTTP_SEC_WEBSOCKET_KEY1' in request.META:
             protocol_version = 76
             if 'HTTP_SEC_WEBSOCKET_KEY2' not in request.META:
                 raise MalformedWebSocket()
         else:
+            # append magic string to webkey
+            magkey = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
+            webkey = request.META['HTTP_SEC_WEBSOCKET_KEY'] + magkey \
+                if 'HTTP_SEC_WEBSOCKET_KEY' in request.META else ''
+            webkey = b64encode(sha1(webkey).digest())
+
             protocol_version = 75
 
         # If it's new-version, we need to work out our challenge response
@@ -64,15 +75,16 @@ def setup_websocket(request):
                 "HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
                 "Upgrade: WebSocket\r\n"
                 "Connection: Upgrade\r\n"
+                "Sec-WebSocket-Accept: %s\r\n"
                 "WebSocket-Origin: %s\r\n"
-                "WebSocket-Location: %s\r\n\r\n" % (
-                    request.META.get('HTTP_ORIGIN'),
-                    location))
+                "WebSocket-Location: %s\r\n\r\n" % (webkey, 
+                    request.META.get('HTTP_ORIGIN'), location))
         elif protocol_version == 76:
             handshake_reply = (
                 "HTTP/1.1 101 Web Socket Protocol Handshake\r\n"
                 "Upgrade: WebSocket\r\n"
                 "Connection: Upgrade\r\n"
+                "Sec-WebSocket-Accept: \r\n"
                 "Sec-WebSocket-Origin: %s\r\n"
                 "Sec-WebSocket-Protocol: %s\r\n"
                 "Sec-WebSocket-Location: %s\r\n" % (
